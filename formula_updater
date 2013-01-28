@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# TODO: Use GitHub API and fork mxcl/homebrew? :)
+
+set -e
+
+if [ $# -eq 0 ];
+then
+    echo "Usage: $0 <formula name>"
+    exit 0
+fi
+
+FORMULA=$1
+FORMULA_PATH=/usr/local/Library/Formula/$FORMULA.rb
+
+if [ ! -f $FORMULA_PATH ];
+then
+    echo "$FORMULA_PATH not found!"
+    exit 1
+fi
+
+brew update
+
+# Need to be here for git operations
+cd /usr/local
+
+# Start from master
+git co master
+
+# Remove old branch
+set +e
+git branch -D $FORMULA
+git push git@github.com:$USER/homebrew.git :$FORMULA
+set -e
+
+# Create new branch
+git branch $FORMULA
+git co $FORMULA
+
+# Edit formula
+HOMEPAGE=$(grep homepage $FORMULA_PATH | awk '{ print $2 }' | sed "s/'//g")
+# TODO: Abort if homepage isn't a GitHub repo page
+LATEST_VERSION=$(git ls-remote --tags $HOMEPAGE.git | tail -n1 | cut -d "/" -f3)
+ARCHIVE_URL=$HOMEPAGE/archive/$LATEST_VERSION.tar.gz
+ESCAPED_ARCHIVE_URL=$(echo $ARCHIVE_URL | sed 's/\//\\\//g')
+sed -i '' "s/^  url.*$/  url '$ESCAPED_ARCHIVE_URL'/" $FORMULA_PATH
+FILE=/tmp/svtplay-dl-$VERSION.tar.gz
+curl -s -L -o $FILE $ARCHIVE_URL
+SHASUM=$(shasum $FILE | awk '{ print $1 }')
+rm $FILE
+sed -i '' "s/^  sha1.*$/  sha1 '$SHASUM'/" $FORMULA_PATH
+
+# Commit
+git ci -m "Update $FORMULA to $LATEST_VERSION" Library/Formula/$FORMULA.rb
+
+# Push
+git push git@github.com:$USER/homebrew.git $FORMULA
+
+echo "Now go to https://github.com/$USER/homebrew/pull/new/$FORMULA"
