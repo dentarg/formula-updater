@@ -44,7 +44,7 @@ LATEST_VERSION=$(git ls-remote --tags $HOMEPAGE.git | tail -n1 | cut -d "/" -f3)
 ARCHIVE_URL=$HOMEPAGE/archive/$LATEST_VERSION.tar.gz
 ESCAPED_ARCHIVE_URL=$(echo $ARCHIVE_URL | sed 's/\//\\\//g')
 sed -i '' "s/^  url.*$/  url '$ESCAPED_ARCHIVE_URL'/" $FORMULA_PATH
-FILE=/tmp/svtplay-dl-$VERSION.tar.gz
+FILE=/tmp/$FORMULA-$VERSION.tar.gz
 curl -s -L -o $FILE $ARCHIVE_URL
 SHASUM=$(shasum $FILE | awk '{ print $1 }')
 rm $FILE
