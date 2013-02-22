@@ -11,7 +11,7 @@ then
 fi
 
 FORMULA=$1
-FORMULA_PATH=/usr/local/Library/Formula/$FORMULA.rb
+FORMULA_PATH="`brew --prefix`/Library/Formula/$FORMULA.rb"
 
 if [ ! -f $FORMULA_PATH ];
 then
