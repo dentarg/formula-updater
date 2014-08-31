@@ -38,7 +38,7 @@ git branch $FORMULA
 git co $FORMULA
 
 # Edit formula
-HOMEPAGE=$(grep homepage $FORMULA_PATH | awk '{ print $2 }' | sed "s/'//g")
+HOMEPAGE=$(grep homepage $FORMULA_PATH | awk '{ print $2 }' | sed "s/'//g" | sed 's/"//g')
 # TODO: Abort if homepage isn't a GitHub repo page
 LATEST_VERSION=$(git ls-remote --tags $HOMEPAGE.git | tail -n1 | cut -d "/" -f3)
 ARCHIVE_URL=$HOMEPAGE/archive/$LATEST_VERSION.tar.gz
